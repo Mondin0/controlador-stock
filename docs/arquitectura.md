@@ -214,7 +214,24 @@ Si en el futuro el sistema crece a cientos de locales y el aislamiento se vuelve
 1. **PostgreSQL Row-Level Security (RLS)**: políticas de seguridad a nivel de motor, no solo aplicación.
 2. **Schema por tenant**: solo si hay requisitos legales de aislamiento estricto.
 
-Ambas migraciones son posibles desde Row-Level sin reescribir el negocio, solo cambia la capa de aislamiento.
+---
+
+## Backoffice: ¿Filament vs Angular?
+
+A la hora de desarrollar el panel administrativo (el *Backoffice*), surgen dos alternativas principales: construirlo como una SPA en **Angular** (igual que la tienda) o utilizar **Filament** (integrado en Laravel). 
+
+Para este MVP, la decisión arquitectónica fundamentada es **Filament**.
+
+| Criterio | Filament 3 (PHP/Laravel) | Angular 21 (SPA) |
+|---|---|---|
+| **Velocidad de Desarrollo** | **Altísima**. Se autogeneran CRUDs completos (tablas, filtros, formularios, validaciones) con un comando artesanal. | **Media/Baja**. Requiere crear componentes, servicios API, guards de ruteo y diseño desde cero. |
+| **Mantenimiento SRE/Ops** | **Excelente**. El panel vive dentro del mismo monolito de la API. Cero latencia de red entre UI y DB. No hay build dist adicional. | Compila AOT, requiere otro pipeline de CI/CD para el backoffice separado de la tienda pública. |
+| **Seguridad y Permisos** | Integración nativa con las *Policies* de Eloquent. Los Guards y RBAC (Roles) se resuelven server-side. | Requiere replicar la lógica de roles en el cliente y doble comprobación en la API (Sanctum Tokens). |
+| **UX / UI** | Look & Feel administrativo estandarizado, predecible y ya responsivo (Tailwind + Alpine under the hood). | Libertad total de diseño (Pixel-perfect), excelente para la UI del cliente final, innecesario para un panel interno. |
+
+**Conclusión SRE:** 
+El propósito SRE es reducir la superficie de esfuerzo (toil) y el *Time to Market*. Construir el backoffice en Angular implicaría programar **dos veces** cada regla de negocio y gestionar **decenas de nuevos endpoints REST**.
+Filament opera como el "cerebro interno" del negocio, leyendo directo de la BD mediante Eloquent, dejando a Laravel exportar solo estrictamente los endpoints públicos necesarios para la tienda Angular (Checkout y Catálogo).
 
 ---
 
